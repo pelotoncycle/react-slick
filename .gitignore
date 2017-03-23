@@ -6,8 +6,15 @@ demos/*
 demos1
 TODO.md
 npm-debug.log
-lib
+test
+testlib
 *.sublime-*
 .idea
-dist
 yarn.lock
+bower.json
+gulpfile.js
+karma.conf.js
+LICENSE
+webpack.config.dist.js
+webpack.config.js
+ISSUE_TEMPLATE.md
