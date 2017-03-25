@@ -1178,6 +1178,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (!props.vertical) {
 	      var centerPaddingAdj = props.centerMode && parseInt(props.centerPadding) * 2;
+	      if (props.centerPadding.slice(-1) === '%') {
+	        centerPaddingAdj *= listWidth / 100;
+	      }
 	      slideWidth = (this.getWidth(_reactDom2.default.findDOMNode(this)) - centerPaddingAdj) / props.slidesToShow;
 	    } else {
 	      slideWidth = this.getWidth(_reactDom2.default.findDOMNode(this));
