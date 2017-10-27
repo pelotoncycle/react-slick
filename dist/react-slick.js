@@ -203,7 +203,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // if 'unslick' responsive breakpoint setting used, just return the <Slider> tag nested HTML
 	      return _react2.default.createElement(
 	        'div',
-	        null,
+	        { className: this.props.className + ' unslicked' },
 	        children
 	      );
 	    } else {
@@ -385,7 +385,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.changeSlide({ message: 'next' });
 	  },
 	  slickGoTo: function slickGoTo(slide) {
-	    typeof slide === 'number' && this.changeSlide({
+	    slide = Number(slide);
+	    !isNaN(slide) && this.changeSlide({
 	      message: 'index',
 	      index: slide,
 	      currentSlide: this.state.currentSlide
@@ -570,7 +571,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	      }
 	    } else if (options.message === 'index') {
-	      targetSlide = parseInt(options.index);
+	      targetSlide = Number(options.index);
 	      if (targetSlide === options.currentSlide) {
 	        return;
 	      }
@@ -623,7 +624,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      e.preventDefault();
 	      return;
 	    }
+	    if (this.state.scrolling) {
+	      return;
+	    }
 	    if (this.state.animating) {
+	      e.preventDefault();
 	      return;
 	    }
 	    if (this.props.vertical && this.props.swipeToSlide && this.props.verticalSwiping) {
@@ -640,9 +645,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    touchObject.curX = e.touches ? e.touches[0].pageX : e.clientX;
 	    touchObject.curY = e.touches ? e.touches[0].pageY : e.clientY;
 	    touchObject.swipeLength = Math.round(Math.sqrt(Math.pow(touchObject.curX - touchObject.startX, 2)));
+	    var verticalSwipeLength = Math.round(Math.sqrt(Math.pow(touchObject.curY - touchObject.startY, 2)));
+
+	    if (!this.props.verticalSwiping && !this.state.swiping && verticalSwipeLength > 4) {
+	      this.setState({
+	        scrolling: true
+	      });
+	      return;
+	    }
 
 	    if (this.props.verticalSwiping) {
-	      touchObject.swipeLength = Math.round(Math.sqrt(Math.pow(touchObject.curY - touchObject.startY, 2)));
+	      touchObject.swipeLength = verticalSwipeLength;
 	    }
 
 	    positionOffset = (this.props.rtl === false ? 1 : -1) * (touchObject.curX > touchObject.startX ? 1 : -1);
@@ -692,6 +705,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return;
 	    }
 	    if (touchObject.swipeLength > 4) {
+	      this.setState({
+	        swiping: true
+	      });
 	      e.preventDefault();
 	    }
 	  },
@@ -788,14 +804,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	      minSwipe = this.state.listHeight / this.props.touchThreshold;
 	    }
 
+	    var wasScrolling = this.state.scrolling;
 	    // reset the state of touch related state variables.
 	    this.setState({
 	      dragging: false,
 	      edgeDragged: false,
+	      scrolling: false,
+	      swiping: false,
 	      swiped: false,
 	      swipeLeft: null,
 	      touchObject: {}
 	    });
+	    if (wasScrolling) {
+	      return;
+	    }
+
 	    // Fix for #13
 	    if (!touchObject.swipeLength) {
 	      return;
@@ -1224,7 +1247,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var listHeight = slideHeight * props.slidesToShow;
 
 	    // pause slider if autoplay is set to false
-	    if (props.autoplay) {
+	    if (!props.autoplay) {
 	      this.pause();
 	    } else {
 	      this.autoPlay();
@@ -1250,10 +1273,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	  },
 	  getWidth: function getWidth(elem) {
-	    return elem.getBoundingClientRect().width || elem.offsetWidth || 0;
+	    return elem && (elem.getBoundingClientRect().width || elem.offsetWidth) || 0;
 	  },
 	  getHeight: function getHeight(elem) {
-	    return elem.getBoundingClientRect().height || elem.offsetHeight || 0;
+	    return elem && (elem.getBoundingClientRect().height || elem.offsetHeight) || 0;
 	  },
 
 	  adaptHeight: function adaptHeight() {
@@ -1525,10 +1548,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    direction: 1,
 	    listWidth: null,
 	    listHeight: null,
+	    scrolling: false,
 	    // loadIndex: 0,
 	    slideCount: null,
 	    slideWidth: null,
 	    slideHeight: null,
+	    swiping: false,
 	    // sliding: false,
 	    // slideOffset: 0,
 	    swipeLeft: null,
@@ -1631,12 +1656,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ (function(module, exports, __webpack_require__) {
 
 	/**
-	 * Copyright 2013-present, Facebook, Inc.
-	 * All rights reserved.
+	 * Copyright (c) 2013-present, Facebook, Inc.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 */
 
@@ -1667,12 +1690,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ (function(module, exports, __webpack_require__) {
 
 	/**
-	 * Copyright 2013-present, Facebook, Inc.
-	 * All rights reserved.
+	 * Copyright (c) 2013-present, Facebook, Inc.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 */
 
@@ -2546,11 +2567,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 */
 
@@ -2570,11 +2589,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 */
 
@@ -2629,12 +2646,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ (function(module, exports, __webpack_require__) {
 
 	/**
-	 * Copyright 2014-2015, Facebook, Inc.
-	 * All rights reserved.
+	 * Copyright (c) 2014-present, Facebook, Inc.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 */
 
@@ -2652,45 +2667,43 @@ return /******/ (function(modules) { // webpackBootstrap
 	var warning = emptyFunction;
 
 	if ((undefined) !== 'production') {
-	  (function () {
-	    var printWarning = function printWarning(format) {
-	      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-	        args[_key - 1] = arguments[_key];
+	  var printWarning = function printWarning(format) {
+	    for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+	      args[_key - 1] = arguments[_key];
+	    }
+
+	    var argIndex = 0;
+	    var message = 'Warning: ' + format.replace(/%s/g, function () {
+	      return args[argIndex++];
+	    });
+	    if (typeof console !== 'undefined') {
+	      console.error(message);
+	    }
+	    try {
+	      // --- Welcome to debugging React ---
+	      // This error was thrown as a convenience so that you can use this stack
+	      // to find the callsite that caused this warning to fire.
+	      throw new Error(message);
+	    } catch (x) {}
+	  };
+
+	  warning = function warning(condition, format) {
+	    if (format === undefined) {
+	      throw new Error('`warning(condition, format, ...args)` requires a warning ' + 'message argument');
+	    }
+
+	    if (format.indexOf('Failed Composite propType: ') === 0) {
+	      return; // Ignore CompositeComponent proptype check.
+	    }
+
+	    if (!condition) {
+	      for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
+	        args[_key2 - 2] = arguments[_key2];
 	      }
 
-	      var argIndex = 0;
-	      var message = 'Warning: ' + format.replace(/%s/g, function () {
-	        return args[argIndex++];
-	      });
-	      if (typeof console !== 'undefined') {
-	        console.error(message);
-	      }
-	      try {
-	        // --- Welcome to debugging React ---
-	        // This error was thrown as a convenience so that you can use this stack
-	        // to find the callsite that caused this warning to fire.
-	        throw new Error(message);
-	      } catch (x) {}
-	    };
-
-	    warning = function warning(condition, format) {
-	      if (format === undefined) {
-	        throw new Error('`warning(condition, format, ...args)` requires a warning ' + 'message argument');
-	      }
-
-	      if (format.indexOf('Failed Composite propType: ') === 0) {
-	        return; // Ignore CompositeComponent proptype check.
-	      }
-
-	      if (!condition) {
-	        for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
-	          args[_key2 - 2] = arguments[_key2];
-	        }
-
-	        printWarning.apply(undefined, [format].concat(args));
-	      }
-	    };
-	  })();
+	      printWarning.apply(undefined, [format].concat(args));
+	    }
+	  };
 	}
 
 	module.exports = warning;
@@ -2703,11 +2716,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 * 
 	 */
@@ -2830,7 +2841,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  } else {
 	    index = spec.index;
 	  }
-
 	  slickCloned = index < 0 || index >= spec.slideCount;
 	  if (spec.centerMode) {
 	    centerOffset = Math.floor(spec.slidesToShow / 2);
@@ -2894,14 +2904,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      child = _react2.default.createElement('div', null);
 	    }
 	    var childStyle = getSlideStyle((0, _objectAssign2.default)({}, spec, { index: index }));
-	    var slickClasses = getSlideClasses((0, _objectAssign2.default)({ index: index }, spec));
-	    var cssClasses;
-
-	    if (child.props.className) {
-	      cssClasses = (0, _classnames2.default)(slickClasses, child.props.className);
-	    } else {
-	      cssClasses = slickClasses;
-	    }
+	    var slideClass = child.props.className || '';
 
 	    var onClick = function onClick(e) {
 	      child.props && child.props.onClick && child.props.onClick(e);
@@ -2913,7 +2916,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    slides.push(_react2.default.cloneElement(child, {
 	      key: 'original' + getKey(child, index),
 	      'data-index': index,
-	      className: cssClasses,
+	      className: (0, _classnames2.default)(getSlideClasses((0, _objectAssign2.default)({ index: index }, spec)), slideClass),
 	      tabIndex: '-1',
 	      style: (0, _objectAssign2.default)({ outline: 'none' }, child.props.style || {}, childStyle),
 	      onClick: onClick
@@ -2928,7 +2931,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        preCloneSlides.push(_react2.default.cloneElement(child, {
 	          key: 'precloned' + getKey(child, key),
 	          'data-index': key,
-	          className: cssClasses,
+	          className: (0, _classnames2.default)(getSlideClasses((0, _objectAssign2.default)({ index: key }, spec)), slideClass),
 	          style: (0, _objectAssign2.default)({}, child.props.style || {}, childStyle),
 	          onClick: onClick
 	        }));
@@ -2939,7 +2942,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        postCloneSlides.push(_react2.default.cloneElement(child, {
 	          key: 'postcloned' + getKey(child, key),
 	          'data-index': key,
-	          className: cssClasses,
+	          className: (0, _classnames2.default)(getSlideClasses((0, _objectAssign2.default)({ index: key }, spec)), slideClass),
 	          style: (0, _objectAssign2.default)({}, child.props.style || {}, childStyle),
 	          onClick: onClick
 	        }));
